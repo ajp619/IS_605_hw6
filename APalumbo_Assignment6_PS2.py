@@ -16,10 +16,11 @@ of both of them occurring together. The order of the two words is not important
 __author__ = 'Aaron Palumbo'
 
 # Import required modules
-import nltk
-import string
 import codecs
 import unicodedata
+from collections import Counter
+import pandas as pd
+from ggplot import *
 
 
 def read_text_file(file_name):
@@ -34,11 +35,24 @@ def clean_text(mystring):
     return mystring.lower()
 
 
+def n_word_count(mytext, upto=1):
+    words = mytext.split()
+    word_list = words[:]
+
+    for n in range(2, upto+1):
+        add_to_list = [' '.join(words[i:i+n]) for i in range(0, len(words)) if i+n <= len(words)]
+        # print add_to_list
+        word_list = word_list + add_to_list
+    return pd.DataFrame(Counter(word_list).most_common(), columns=['Word', 'Frequency'])
+
+
 def main():
     file_name = "assign6.sample.txt"        #Expect file in same directory
     data = read_text_file(file_name)
     data = clean_text(data)
-    print data
+    wordcount = n_word_count(data, 3)
+    print wordcount
+    ggplot(aes(y='Frequency'), data=wordcount) + geom_point()
 
 
 if __name__ == "__main__":
